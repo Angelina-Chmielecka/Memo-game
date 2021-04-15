@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Memory game</title>
+    <script type="text/javascript">
+      var ctx;
+      var firstPick = true;
+      var canPick = true;
+      var card1Index = -1;
+      var card2Index;
+      var backcolor = "rgb(150,50,150)";
+      var tablecolor = "rgb(255,255,255)";
+      var debugColor = "rgb(255, 0, 0)";
+      var deck = [];
+      var firstsx = 30;
+
+      var firstsy = 50;
+      var margin = 30;
+      var cardwidth = 100;
+      var cardheight = 100;
+      var matched;
+      var starttime;
+      var machedCount = 0;
+      var pairs = [
+        "man.png",
+        "girl.png",
+        "manTie.png",
+        "home.png",
+        "cellPhone.png",
+        "placeholder.png",
+        "checked.png",
+        "front.png",
+      ];
+
+      function Card(x, y, width, height, img, pairID) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.pairID = pairID;
+        this.img = img;
+        this.draw = drawCardBackground;
+      }
+
+      function generateDeck() {
+        var i;
+        var card1;
+        var card2;
+        var img1;
+        var img2;
+        var currentCardX = firstsx;
+        var currentCardY = firstsy;
+
+        for (i = 0; i < pairs.length; i++) {
+          img1 = new Image();
+          img1.src = pairs[i];
+          card1 = new Card(
+            currentCardX,
+            currentCardY,
+            cardwidth,
+            cardheight,
+            img1,
+            i
+          );
+
+          deck.push(card1);
+
+          img2 = new Image();
+          img2.src = pairs[i];
+          card2 = new Card(
+            currentCardX,
+            currentCardY + cardheight + margin,
+            cardwidth,
+            cardheight,
+            img2,
+            i
+          );
+
+          deck.push(card2);
+
+          currentCardX = currentCardX + cardwidth + margin;
+
+          card1.draw();
+          card2.draw();
+        }
+      }
+
+      function shuffle() {
+        var i1;
+        var i2;
+        var holderinfo;
+        var holderimg;
+        var dl = deck.length;
+        var nt;
+        for (nt = 0; nt < 3 * dl; nt++) {
+          // switch random 2 cards
+          i1 = Math.floor(Math.random() * dl); // random card 1 index
+          i2 = Math.floor(Math.random() * dl); // random card 2 index
+
+          holderinfo = deck[i1].pairID;
+          holderimg = deck[i1].img;
+
+          deck[i1].pairID = deck[i2].pairID;
+          deck[i1].img = deck[i2].img;
+
+          deck[i2].pairID = holderinfo;
+          deck[i2].img = holderimg;
+        }
+      }
+
+      function drawCardBackground() {
+        ctx.fillStyle = backcolor;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+
+      function choose(ev) {
+        var out;
+        var mouseX;
+        var mouseY;
+        var pick1;
+        var pick2;
+
+        if (!canPick) {
+          return;
+        }
+
+        // getting mouse click coordinates
+        if (ev.layerX || ev.layerX == 0) {
+          mouseX = ev.layerX;
+          mouseY = ev.layerY;
+        } else if (ev.offsetX || ev.offsetX == 0) {
+          mouseX = ev.offsetX;
+          mouseY = ev.offsetY;
+        }
+
+        // finding 'clicked' card
+        var i;
+        for (i = 0; i < deck.length; i++) {
+          var card = deck[i];
+          if (card.x >= 0)
+            if (
+              mouseX > card.x &&
+              mouseX < card.x + card.width &&
+              mouseY > card.y &&
+              mouseY < card.y + card.height
+            ) {
+              if (firstPick || i != card1Index) {
+                break;
+              }
+            }
+        }
+
+        if (i < deck.length) {
+          if (firstPick) {
+            card1Index = i;
+            var card1 = deck[card1Index];
+            firstPick = false;
+            ctx.drawImage(
+              card1.img,
+              card1.x,
+              card1.y,
+              card1.width,
+              card1.height
+            );
+          } else {
+            card2Index = i;
+            var card1 = deck[card1Index];
+            var card2 = deck[card2Index];
+            ctx.drawImage(
+              card2.img,
+              card2.x,
+              card2.y,
+              card2.width,
+              card2.height
+            );
+
+            if (card1.pairID == card2.pairID) {
+              matched = true;
+              machedCount++;
+
+              // updating count text:
+              ctx.fillStyle = tablecolor;
+              ctx.fillRect(10, 340, 900, 100);
+              ctx.fillStyle = debugColor;
+              ctx.fillText("Number of pairs:" + String(machedCount), 10, 360);
+
+              if (machedCount >= 0.5 * deck.length) {
+                var now = new Date();
+                var nt = Number(now.getTime());
+                var seconds = Math.floor(0.5 + (nt - starttime) / 1000);
+                ctx.fillStyle = tablecolor;
+                ctx.fillRect(0, 0, 900, 400);
+                ctx.fillStyle = backcolor;
+                out = "Game time: " + String(seconds) + " seconds.";
+                ctx.fillText(out, 10, 100);
+                ctx.fillText("Refresh page.", 10, 300);
+              }
+            } else {
+              matched = false;
+            }
+
+            firstPick = true;
+            canPick = false;
+            setTimeout(flipback, 1000);
+          }
+        }
+      }
+
+      function flipback() {
+        if (!matched) {
+          deck[card1Index].draw();
+          deck[card2Index].draw();
+        } else {
+          ctx.fillStyle = tablecolor;
+          ctx.fillRect(
+            deck[card1Index].x,
+            deck[card1Index].y,
+            deck[card1Index].width,
+            deck[card1Index].height
+          );
+
+          ctx.fillRect(
+            deck[card2Index].x,
+            deck[card2Index].y,
+            deck[card2Index].width,
+            deck[card2Index].height
+          );
+
+          deck[card2Index].x = -1000;
+          deck[card1Index].x = -1000;
+        }
+
+        canPick = true;
+      }
+
+      function init() {
+        ctx = document.getElementById("canvas").getContext("2d");
+        canvas1 = document.getElementById("canvas");
+        canvas1.addEventListener("click", choose, false);
+        generateDeck();
+        shuffle();
+        ctx.font = "bold 20pt sans-serif";
+        ctx.fillStyle = debugColor;
+        ctx.fillText("Mark two cards. Look for pairs", 10, 20);
+        ctx.fillText("Number of cards: 0", 10, 360);
+        starttime = new Date();
+        starttime = Number(starttime.getTime());
+      }
+    </script>
+  </head>
+  <body onload="init();">
+    <canvas id="canvas" width="1200" height="400">
+      Your browser does not support the item HTML5 standard canvas.
+    </canvas>
+  </body>
+</html>
