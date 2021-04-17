@@ -22,14 +22,14 @@
       var starttime;
       var machedCount = 0;
       var pairs = [
-        "man.png",
-        "girl.png",
-        "manTie.png",
-        "home.png",
-        "cellPhone.png",
-        "placeholder.png",
-        "checked.png",
-        "front.png",
+        "img/man.png",
+        "img/girl.png",
+        // "img/manTie.png",
+        // "img/home.png",
+        // "img/cellPhone.png",
+        // "img/placeholder.png",
+        // "img/checked.png",
+        // "img/front.png",
       ];
 
       function Card(x, y, width, height, img, pairID) {
@@ -184,16 +184,21 @@
               ctx.fillStyle = debugColor;
               ctx.fillText("Number of pairs:" + String(machedCount), 10, 360);
 
+              // check endgame condition
               if (machedCount >= 0.5 * deck.length) {
                 var now = new Date();
                 var nt = Number(now.getTime());
                 var seconds = Math.floor(0.5 + (nt - starttime) / 1000);
+                var minutes = Math.floor(seconds / 60);
+
                 ctx.fillStyle = tablecolor;
                 ctx.fillRect(0, 0, 900, 400);
                 ctx.fillStyle = backcolor;
-                out = "Game time: " + String(seconds) + " seconds.";
+                out = `Game time: ${minutes}m ${seconds}s`;
                 ctx.fillText(out, 10, 100);
                 ctx.fillText("Refresh page.", 10, 300);
+
+                return;
               }
             } else {
               matched = false;
