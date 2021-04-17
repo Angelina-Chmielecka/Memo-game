@@ -2,19 +2,23 @@
 <html>
   <head>
     <title>Memory game</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript">
       var ctx;
       var firstPick = true;
       var canPick = true;
       var card1Index = -1;
       var card2Index;
-      var backcolor = "rgb(150,50,150)";
-      var tablecolor = "rgb(255,255,255)";
-      var debugColor = "rgb(255, 0, 0)";
+      var cardColor = "#5673F0";
+      var tableColor = "#3B7B00";
+      var textColor = "#aaaaaa";
       var deck = [];
-      var firstsx = 30;
 
+      // canvas size:
+      // 8 * 100 + 7 & 30 + 30 + 30
+      var firstsx = 30;
       var firstsy = 50;
+
       var margin = 30;
       var cardwidth = 100;
       var cardheight = 100;
@@ -24,12 +28,12 @@
       var pairs = [
         "img/man.png",
         "img/girl.png",
-        // "img/manTie.png",
-        // "img/home.png",
-        // "img/cellPhone.png",
-        // "img/placeholder.png",
-        // "img/checked.png",
-        // "img/front.png",
+        "img/manTie.png",
+        "img/home.png",
+        "img/cellPhone.png",
+        "img/placeholder.png",
+        "img/checked.png",
+        "img/front.png",
       ];
 
       function Card(x, y, width, height, img, pairID) {
@@ -109,7 +113,7 @@
       }
 
       function drawCardBackground() {
-        ctx.fillStyle = backcolor;
+        ctx.fillStyle = cardColor;
         ctx.fillRect(this.x, this.y, this.width, this.height);
       }
 
@@ -179,22 +183,24 @@
               machedCount++;
 
               // updating count text:
-              ctx.fillStyle = tablecolor;
+              ctx.fillStyle = tableColor;
               ctx.fillRect(10, 340, 900, 100);
-              ctx.fillStyle = debugColor;
+              ctx.fillStyle = textColor;
               ctx.fillText("Number of pairs:" + String(machedCount), 10, 360);
 
               // check endgame condition
               if (machedCount >= 0.5 * deck.length) {
                 var now = new Date();
+
                 var nt = Number(now.getTime());
                 var seconds = Math.floor(0.5 + (nt - starttime) / 1000);
                 var minutes = Math.floor(seconds / 60);
+                var remainderSeconds = seconds - minutes * 60;
+                out = `Game time: ${minutes}m ${remainderSeconds}s`; // new string formater C#
+                ctx.fillStyle = tableColor;
+                ctx.fillRect(0, 0, 1070, 400);
+                ctx.fillStyle = textColor;
 
-                ctx.fillStyle = tablecolor;
-                ctx.fillRect(0, 0, 900, 400);
-                ctx.fillStyle = backcolor;
-                out = `Game time: ${minutes}m ${seconds}s`;
                 ctx.fillText(out, 10, 100);
                 ctx.fillText("Refresh page.", 10, 300);
 
@@ -216,7 +222,7 @@
           deck[card1Index].draw();
           deck[card2Index].draw();
         } else {
-          ctx.fillStyle = tablecolor;
+          ctx.fillStyle = tableColor;
           ctx.fillRect(
             deck[card1Index].x,
             deck[card1Index].y,
@@ -242,19 +248,21 @@
         ctx = document.getElementById("canvas").getContext("2d");
         canvas1 = document.getElementById("canvas");
         canvas1.addEventListener("click", choose, false);
+        ctx.fillStyle = tableColor;
+        ctx.fillRect(0, 0, 9999, 99999);
         generateDeck();
         shuffle();
         ctx.font = "bold 20pt sans-serif";
-        ctx.fillStyle = debugColor;
+        ctx.fillStyle = textColor;
         ctx.fillText("Mark two cards. Look for pairs", 10, 20);
-        ctx.fillText("Number of cards: 0", 10, 360);
+        ctx.fillText("Number of pairs: 0", 10, 360);
         starttime = new Date();
         starttime = Number(starttime.getTime());
       }
     </script>
   </head>
   <body onload="init();">
-    <canvas id="canvas" width="1200" height="400">
+    <canvas id="canvas" width="1070" height="400">
       Your browser does not support the item HTML5 standard canvas.
     </canvas>
   </body>
