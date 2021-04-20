@@ -202,7 +202,9 @@
                 ctx.fillStyle = textColor;
 
                 ctx.fillText(out, 10, 100);
-                ctx.fillText("Refresh page.", 10, 300);
+                document
+                  .getElementById("refreshButton")
+                  .classList.remove("hidden");
 
                 return;
               }
@@ -265,5 +267,8 @@
     <canvas id="canvas" width="1070" height="400">
       Your browser does not support the item HTML5 standard canvas.
     </canvas>
+    <button id="refreshButton" class="hidden" onclick="location.reload();">
+      Refresh
+    </button>
   </body>
 </html>
